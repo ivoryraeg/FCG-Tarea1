@@ -42,6 +42,7 @@ public:
         vec3(1, -1, 0),
         vec3(0, 1, 0)};
     quat rot = quat(vec3(0,0,0));
+    vec3 scale = vec3(1,1,1);
     glm::vec3 pos = vec3(0,0,0);
     void Rotate(vec3 eulerAngles){        
         rot = rot*quat(eulerAngles);
@@ -50,7 +51,7 @@ public:
         int j = 0;
         for (int i = 0; i < 9; i += 3)
         {
-            vec3 vector = vertices[j]*rot;
+            vec3 vector = vertices[j]*rot*scale;
             vector += pos;
             vertexB[i] = vector.x;
             vertexB[i + 1] = vector.y;
@@ -101,15 +102,20 @@ class Square{
         vec3(1.0f,-1.0f, 1.0f)
     };
     quat squareRot = quat(vec3(0,0,0));
+    vec3 squareScale = vec3(1,1,1);
     void PassToBuffer(GLfloat *vertexB){
 
         for(int i = 0; i < 36 ; i++){
             vec3 aux = vec3(vertexB[i*3],vertexB[i*3+1],vertexB[i*3+2]);
             aux = aux * squareRot;
+            aux = aux * squareScale;
             vertexB[i*3] = aux.x;
             vertexB[i*3+1] = aux.y;
             vertexB[i*3+2] = aux.z;
         }
+
+        squareRot = quat(vec3(0,0,0));
+        squareScale = vec3(1,1,1);
     }
 };
 
@@ -218,7 +224,8 @@ void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
         if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
             triangle1.Rotate(vec3(0,0,deltaTime));
         } 
-    }if(currentScene == "scene1"){
+    }
+    if(currentScene == "scene3"){
         if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
             square1.squareRot = vec3(deltaTime,0,0);
         }   
@@ -227,6 +234,39 @@ void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
         }  
         if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
             square1.squareRot = vec3(0,0,deltaTime);
+        } 
+    }
+}
+
+void scaleObject(double deltaTime, GLFWwindow *window, std::string sceneName)
+{
+    std::string currentScene = sceneName;
+    if(currentScene == "scene2"){
+         if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        {
+            triangle1.scale.x += deltaTime;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+        {
+            triangle1.scale.y += deltaTime;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        {
+            triangle1.scale.z += deltaTime;
+        } 
+    }
+    if(currentScene == "scene3"){
+        if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        {
+            square1.squareScale.x += deltaTime;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+        {
+            square1.squareScale.y += deltaTime;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        {
+            square1.squareScale.z += deltaTime;
         } 
     }
 }
@@ -320,6 +360,7 @@ void Scene2(double deltaTime, GLFWwindow *window)
     );*/
     // Draw the triangle 2!
     moveObject(deltaTime,window, "scene2");
+    scaleObject(deltaTime,window, "scene2");
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 
     glDisableVertexAttribArray(0);
@@ -370,7 +411,8 @@ void Scene3(double deltaTime, GLFWwindow *window){
         0,                                // stride
         (void*)0                          // array buffer offset
     );
-    moveObject(deltaTime,window, "scene1");
+    moveObject(deltaTime,window, "scene3");
+    scaleObject(deltaTime,window, "scene3");
     glDrawArrays(GL_TRIANGLES, 0, 12*3);
     glDisableVertexAttribArray(0);
     square1.PassToBuffer(g_vertex_buffer_data);
@@ -469,8 +511,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Draw through function
+        Scene1(deltaTime);
         //Scene2(deltaTime, window);
-        Scene3(deltaTime, window);
+        //Scene3(deltaTime, window);
 
         glNamedBufferData(VertexArrayID[0], sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);        
         //glUseProgram(programID2);
