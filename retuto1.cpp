@@ -26,6 +26,8 @@ using namespace glm;
 
 #include "common/shader.hpp"
 
+std::string currentScene;
+
 double timeToShader = 3;
 // This will identify our vertex buffer
 GLuint vertexbuffer[2];
@@ -207,8 +209,8 @@ static const GLfloat g_color_buffer_data[] = {
 
 void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
 
-    std::string currentScene = sceneName;
-    if(currentScene == "scene2"){
+    std::string currentSceneX = sceneName;
+    if(currentSceneX == "scene2"){
         if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
             triangle1.Rotate(vec3(deltaTime,0,0));
         }   
@@ -218,7 +220,7 @@ void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
         if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
             triangle1.Rotate(vec3(0,0,deltaTime));
         } 
-    }if(currentScene == "scene1"){
+    }if(currentSceneX == "scene1"){
         if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
             square1.squareRot = vec3(deltaTime,0,0);
         }   
@@ -231,43 +233,20 @@ void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
     }
 }
 
-void Scene1(double deltaTime)
+void Scene1(double deltaTime, GLFWwindow *window)
 {
-    static float yDirection = 1;
-    // Draw triangle...
 
-    // 1st attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_DRAW_BUFFER);//**
-    //glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[0]);//**
-    //glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[1]);//**
-    glVertexAttribPointer(
-        0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
-        3,        // size
-        GL_FLOAT, // type
-        GL_FALSE, // normalized?
-        0,        // stride
-        (void *)0 // array buffer offset
-    );
-    // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
+        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+            currentScene = "Scene2";
 
-    if (g_vertex_buffer_data1[1] > 1 && yDirection > 0)
-    {
-        yDirection = -1;
-        g_vertex_buffer_data1[1] -= (g_vertex_buffer_data1[1] - 1);
-    }
-    else if (g_vertex_buffer_data1[1] < -1 && yDirection < 0)
-    {
-        yDirection = 1;
-        g_vertex_buffer_data1[1] -= (g_vertex_buffer_data1[1] + 1);
-    }
-    g_vertex_buffer_data1[1] += deltaTime * yDirection * 2;
+        }
+
+
 }
 
 void Scene2(double deltaTime, GLFWwindow *window)
 {
+
     // Draw triangle...
 
     glUseProgram(programID);
@@ -340,7 +319,13 @@ void Scene2(double deltaTime, GLFWwindow *window)
 
     triangle1.PassToBuffer(g_vertex_buffer_data1);
     //triangle2.PassToBuffer(g_vertex_buffer_data2);
-    
+
+ 
+
+    if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+                currentScene = "Scene3";
+            }
+        
 }
 
 void Scene3(double deltaTime, GLFWwindow *window){
@@ -442,8 +427,11 @@ int main()
     double deltaTime = 0;
     triangle2.pos = vec3(0,0,-1.5);
 
+
+
     do
     {
+        
 
         //getsTime Dif
         t_start = t_end;
@@ -469,8 +457,34 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Draw through function
-        //Scene2(deltaTime, window);
-        Scene3(deltaTime, window);
+        //
+        std::cout << currentScene;
+
+
+        Scene1(deltaTime, window);
+
+        if(currentScene == "Scene2")
+        {
+            Scene2(deltaTime, window);
+        }
+        if(currentScene == "Scene3")
+        {
+            Scene3(deltaTime, window);
+        }
+        /*
+        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && currentScene == "Scene1"){
+            currentScene = "Scene2";
+            Scene2(deltaTime, window);
+            
+        }
+        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && currentScene == "Scene2"){
+            Scene3(deltaTime, window);
+            currentScene = "Scene3";
+        }
+*/
+
+
+
 
         glNamedBufferData(VertexArrayID[0], sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);        
         //glUseProgram(programID2);
