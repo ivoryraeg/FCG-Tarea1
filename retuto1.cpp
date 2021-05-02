@@ -26,9 +26,10 @@ using namespace glm;
 
 #include "common/shader.hpp"
 
+
 double timeToShader = 3;
 
-int screen = 0;
+int screen = 1;
 // This will identify our vertex buffer
 GLuint vertexbuffer[2];
 
@@ -273,6 +274,7 @@ void scaleObject(double deltaTime, GLFWwindow *window, std::string sceneName)
     }
 }
 
+
 void Scene1(double deltaTime,GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
@@ -288,7 +290,6 @@ void Scene2(double deltaTime, GLFWwindow *window)
     glUseProgram(programID);
     // 1st attribute buffer : vertices
     glEnableVertexAttribArray(0);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_DRAW_BUFFER);//**Hace lo mismo sin esto
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[0]);     
     glVertexAttribPointer(
         0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -317,23 +318,7 @@ void Scene2(double deltaTime, GLFWwindow *window)
         int vertexColorLocation = glGetUniformLocation(programID, "ourColor");//Se pasa el valor que retorna y el nombre de la variable
         glUniform3f(vertexColorLocation, 0.0f, 0.0f, 1.0f);
     }
-    // Draw the triangle !
-      
-    /*glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
 
-    glUseProgram(programID2);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[1]); 
-    glVertexAttribPointer(
-        0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
-        3,        // size
-        GL_FLOAT, // type
-        GL_FALSE, // normalized?
-        0,        // stride
-        (void *)0 // array buffer offset
-    );*/
-    // Draw the triangle 2!
     moveObject(deltaTime,window, "scene2");
     scaleObject(deltaTime,window, "scene2");
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
@@ -344,7 +329,6 @@ void Scene2(double deltaTime, GLFWwindow *window)
 
     // Don't forget to #include <glm/gtc/quaternion.hpp> and <glm/gtx/quaternion.hpp>
 
-    //triangle1.Rotate(vec3(0,0,deltaTime));
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         triangle1.pos += vec3(-deltaTime,0,0);
     }
@@ -352,14 +336,9 @@ void Scene2(double deltaTime, GLFWwindow *window)
         if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE)
             screen = 2;
     }
-    /*if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        triangle2.pos += vec3(deltaTime,0,0);
-    }
-
-    triangle2.Rotate(vec3(0,-deltaTime,deltaTime));*/
 
     triangle1.PassToBuffer(g_vertex_buffer_data1);
-    //triangle2.PassToBuffer(g_vertex_buffer_data2);
+
     
 }
 
@@ -368,16 +347,6 @@ void Scene3(double deltaTime, GLFWwindow *window){
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-
-
-    /*quat rot = quat(vec3(0,deltaTime,deltaTime));
-    for(int i = 0; i < 36 ; i++){
-        vec3 aux = vec3(g_vertex_buffer_data[i*3],g_vertex_buffer_data[i*3+1],g_vertex_buffer_data[i*3+2]);
-        aux = aux * rot;
-        g_vertex_buffer_data[i*3] = aux.x;
-        g_vertex_buffer_data[i*3+1] = aux.y;
-        g_vertex_buffer_data[i*3+2] = aux.z;
-    }*/
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
@@ -489,9 +458,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Draw through function
-        //Scene1(deltaTime);
-        //Scene2(deltaTime, window);
-        //Scene3(deltaTime, window);
         if(screen == 0){
             Scene1(deltaTime, window);
         }else if(screen == 1){
@@ -502,7 +468,6 @@ int main()
 
 
         glNamedBufferData(VertexArrayID[0], sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);        
-        //glUseProgram(programID2);
         glNamedBufferData(VertexArrayID[1], sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
         
         // Swap buffers
