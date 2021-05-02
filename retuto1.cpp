@@ -27,6 +27,8 @@ using namespace glm;
 #include "common/shader.hpp"
 
 double timeToShader = 3;
+
+int screen = 0;
 // This will identify our vertex buffer
 GLuint vertexbuffer[2];
 
@@ -271,39 +273,12 @@ void scaleObject(double deltaTime, GLFWwindow *window, std::string sceneName)
     }
 }
 
-void Scene1(double deltaTime)
+void Scene1(double deltaTime,GLFWwindow *window)
 {
-    static float yDirection = 1;
-    // Draw triangle...
-
-    // 1st attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_DRAW_BUFFER);//**
-    //glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[0]);//**
-    //glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer[1]);//**
-    glVertexAttribPointer(
-        0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
-        3,        // size
-        GL_FLOAT, // type
-        GL_FALSE, // normalized?
-        0,        // stride
-        (void *)0 // array buffer offset
-    );
-    // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
-
-    if (g_vertex_buffer_data1[1] > 1 && yDirection > 0)
-    {
-        yDirection = -1;
-        g_vertex_buffer_data1[1] -= (g_vertex_buffer_data1[1] - 1);
+    if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE)
+            screen = 1;
     }
-    else if (g_vertex_buffer_data1[1] < -1 && yDirection < 0)
-    {
-        yDirection = 1;
-        g_vertex_buffer_data1[1] -= (g_vertex_buffer_data1[1] + 1);
-    }
-    g_vertex_buffer_data1[1] += deltaTime * yDirection * 2;
 }
 
 void Scene2(double deltaTime, GLFWwindow *window)
@@ -372,6 +347,10 @@ void Scene2(double deltaTime, GLFWwindow *window)
     //triangle1.Rotate(vec3(0,0,deltaTime));
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         triangle1.pos += vec3(-deltaTime,0,0);
+    }
+    if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE)
+            screen = 2;
     }
     /*if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
         triangle2.pos += vec3(deltaTime,0,0);
@@ -486,7 +465,6 @@ int main()
 
     do
     {
-
         //getsTime Dif
         t_start = t_end;
         t_end = std::chrono::high_resolution_clock::now();
@@ -511,9 +489,17 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Draw through function
-        Scene1(deltaTime);
+        //Scene1(deltaTime);
         //Scene2(deltaTime, window);
         //Scene3(deltaTime, window);
+        if(screen == 0){
+            Scene1(deltaTime, window);
+        }else if(screen == 1){
+            Scene2(deltaTime, window);
+        }else if(screen == 2){
+            Scene3(deltaTime, window);
+        }
+
 
         glNamedBufferData(VertexArrayID[0], sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);        
         //glUseProgram(programID2);
