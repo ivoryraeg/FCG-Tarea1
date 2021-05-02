@@ -60,7 +60,61 @@ public:
     }
 };
 
+class Square{
+    public:
+    glm::vec3 vertices[36] = {
+        vec3(-1.0f,-1.0f,-1.0f), // triangle 1 : begin
+        vec3(-1.0f,-1.0f, 1.0f),
+        vec3(-1.0f, 1.0f, 1.0f), // triangle 1 : end
+        vec3(1.0f, 1.0f,-1.0f), // triangle 2 : begin
+        vec3(-1.0f,-1.0f,-1.0f),
+        vec3(-1.0f, 1.0f,-1.0f), // triangle 2 : end
+        vec3(1.0f,-1.0f, 1.0f),
+        vec3(-1.0f,-1.0f,-1.0f),
+        vec3(1.0f,-1.0f,-1.0f),
+        vec3(1.0f, 1.0f,-1.0f),
+        vec3(1.0f,-1.0f,-1.0f),
+        vec3(-1.0f,-1.0f,-1.0f),
+        vec3(-1.0f,-1.0f,-1.0f),
+        vec3(-1.0f, 1.0f, 1.0f),
+        vec3(-1.0f, 1.0f,-1.0f),
+        vec3(1.0f,-1.0f, 1.0f),
+        vec3(-1.0f,-1.0f, 1.0f),
+        vec3(-1.0f,-1.0f,-1.0f),
+        vec3(-1.0f, 1.0f, 1.0f),
+        vec3(-1.0f,-1.0f, 1.0f),
+        vec3(1.0f,-1.0f, 1.0f),
+        vec3(1.0f, 1.0f, 1.0f),
+        vec3(1.0f,-1.0f,-1.0f),
+        vec3(1.0f, 1.0f,-1.0f),
+        vec3(1.0f,-1.0f,-1.0f),
+        vec3(1.0f, 1.0f, 1.0f),
+        vec3(1.0f,-1.0f, 1.0f),
+        vec3(1.0f, 1.0f, 1.0f),
+        vec3(1.0f, 1.0f,-1.0f),
+        vec3(-1.0f, 1.0f,-1.0f),
+        vec3(1.0f, 1.0f, 1.0f),
+        vec3(-1.0f, 1.0f,-1.0f),
+        vec3(-1.0f, 1.0f, 1.0f),
+        vec3(1.0f, 1.0f, 1.0f),
+        vec3(-1.0f, 1.0f, 1.0f),
+        vec3(1.0f,-1.0f, 1.0f)
+    };
+    quat squareRot = quat(vec3(0,0,0));
+    void PassToBuffer(GLfloat *vertexB){
+
+        for(int i = 0; i < 36 ; i++){
+            vec3 aux = vec3(vertexB[i*3],vertexB[i*3+1],vertexB[i*3+2]);
+            aux = aux * squareRot;
+            vertexB[i*3] = aux.x;
+            vertexB[i*3+1] = aux.y;
+            vertexB[i*3+2] = aux.z;
+        }
+    }
+};
+
 Triangle triangle1, triangle2;
+Square square1;
 
 static GLfloat g_vertex_buffer_data1[] = {
     -1.0f, -1.0f, 0.0f,
@@ -73,7 +127,7 @@ static GLfloat g_vertex_buffer_data2[] = {
     0.0f, 1.0f, 0.0f
     };
 
-static const GLfloat g_vertex_buffer_data[] = {//Triangulos que componen el cuadrado
+static GLfloat g_vertex_buffer_data[] = {//Triangulos que componen el cuadrado
     -1.0f,-1.0f,-1.0f, // triangle 1 : begin
     -1.0f,-1.0f, 1.0f,
     -1.0f, 1.0f, 1.0f, // triangle 1 : end
@@ -150,6 +204,32 @@ static const GLfloat g_color_buffer_data[] = {
     0.820f,  0.883f,  0.371f,
     0.982f,  0.099f,  0.879f
 };
+
+void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
+
+    std::string currentScene = sceneName;
+    if(currentScene == "scene2"){
+        if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
+            triangle1.Rotate(vec3(deltaTime,0,0));
+        }   
+        if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
+            triangle1.Rotate(vec3(0,deltaTime,0));
+        }  
+        if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+            triangle1.Rotate(vec3(0,0,deltaTime));
+        } 
+    }if(currentScene == "scene1"){
+        if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
+            square1.squareRot = vec3(deltaTime,0,0);
+        }   
+        if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
+            square1.squareRot = vec3(0,deltaTime,0);
+        }  
+        if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+            square1.squareRot = vec3(0,0,deltaTime);
+        } 
+    }
+}
 
 void Scene1(double deltaTime)
 {
@@ -239,7 +319,7 @@ void Scene2(double deltaTime, GLFWwindow *window)
         (void *)0 // array buffer offset
     );*/
     // Draw the triangle 2!
-       
+    moveObject(deltaTime,window, "scene2");
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 
     glDisableVertexAttribArray(0);
@@ -248,7 +328,7 @@ void Scene2(double deltaTime, GLFWwindow *window)
 
     // Don't forget to #include <glm/gtc/quaternion.hpp> and <glm/gtx/quaternion.hpp>
 
-    triangle1.Rotate(vec3(0,0,deltaTime));
+    //triangle1.Rotate(vec3(0,0,deltaTime));
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         triangle1.pos += vec3(-deltaTime,0,0);
     }
@@ -263,26 +343,39 @@ void Scene2(double deltaTime, GLFWwindow *window)
     
 }
 
-void Scene3(){
-
+void Scene3(double deltaTime, GLFWwindow *window){
+    
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(1);
+
+    /*quat rot = quat(vec3(0,deltaTime,deltaTime));
+    for(int i = 0; i < 36 ; i++){
+        vec3 aux = vec3(g_vertex_buffer_data[i*3],g_vertex_buffer_data[i*3+1],g_vertex_buffer_data[i*3+2]);
+        aux = aux * rot;
+        g_vertex_buffer_data[i*3] = aux.x;
+        g_vertex_buffer_data[i*3+1] = aux.y;
+        g_vertex_buffer_data[i*3+2] = aux.z;
+    }*/
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     glVertexAttribPointer(
-        1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+        0,                                // attribute. No particular reason for 1, but must match the layout in the shader.
         3,                                // size
         GL_FLOAT,                         // type
         GL_FALSE,                         // normalized?
         0,                                // stride
         (void*)0                          // array buffer offset
     );
-
+    moveObject(deltaTime,window, "scene1");
     glDrawArrays(GL_TRIANGLES, 0, 12*3);
+    glDisableVertexAttribArray(0);
+    square1.PassToBuffer(g_vertex_buffer_data);
 }
+
 
 int main()
 {
@@ -348,6 +441,7 @@ int main()
 
     double deltaTime = 0;
     triangle2.pos = vec3(0,0,-1.5);
+
     do
     {
 
@@ -375,8 +469,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Draw through function
-        Scene2(deltaTime, window);
-        //Scene3();
+        //Scene2(deltaTime, window);
+        Scene3(deltaTime, window);
 
         glNamedBufferData(VertexArrayID[0], sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);        
         //glUseProgram(programID2);
