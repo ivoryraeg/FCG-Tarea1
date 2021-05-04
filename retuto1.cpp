@@ -10,6 +10,9 @@
 #include <time.h>
 #include <chrono>
 
+#include <glm/gtc/matrix_transform.hpp> 
+#include <glm/gtx/transform.hpp>
+
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -25,7 +28,6 @@
 using namespace glm;
 
 #include "common/shader.hpp"
-
 
 double timeToShader = 3;
 
@@ -54,7 +56,7 @@ public:
         int j = 0;
         for (int i = 0; i < 9; i += 3)
         {
-            vec3 vector = vertices[j]*rot*scale;
+            vec3 vector = vertices[j]*scale*rot;
             vector += pos;
             vertexB[i] = vector.x;
             vertexB[i + 1] = vector.y;
@@ -108,21 +110,21 @@ class Square{
     float timer = 3;
     int direction = 1;
     quat squareRot = quat(vec3(0,0,0));
+    void Rotate(vec3 eulerAngles){        
+        squareRot = squareRot*quat(eulerAngles);
+    } 
     vec3 squareScale = vec3(1,1,1);
     void PassToBuffer(GLfloat *vertexB){
 
         for(int i = 0; i < 36 ; i++){
-            vec3 aux = vec3(vertexB[i*3],vertexB[i*3+1],vertexB[i*3+2]);
-            aux = aux + squareMove;
-            aux = aux * squareRot;
+            vec3 aux = vertices[i];
             aux = aux * squareScale;
+            aux = aux * squareRot;
+            aux = aux + squareMove;
             vertexB[i*3] = aux.x;
             vertexB[i*3+1] = aux.y;
             vertexB[i*3+2] = aux.z;
         }
-
-        squareRot = quat(vec3(0,0,0));
-        squareScale = vec3(1,1,1);
     }
 };
 
@@ -218,7 +220,7 @@ static const GLfloat g_color_buffer_data[] = {
     0.982f,  0.099f,  0.879f
 };
 
-void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
+void rotateObject(double deltaTime, GLFWwindow *window, std::string sceneName){
 
     std::string currentScene = sceneName;
     if(currentScene == "scene2"){
@@ -234,13 +236,13 @@ void moveObject(double deltaTime, GLFWwindow *window, std::string sceneName){
     }
     if(currentScene == "scene3"){
         if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
-            square1.squareRot = vec3(deltaTime,0,0);
+            square1.Rotate(vec3(deltaTime,0,0));
         }   
         if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-            square1.squareRot = vec3(0,deltaTime,0);
+            square1.Rotate(vec3(0,deltaTime,0));
         }  
         if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
-            square1.squareRot = vec3(0,0,deltaTime);
+            square1.Rotate(vec3(0,0,deltaTime));
         } 
     }
 }
@@ -305,19 +307,16 @@ void Scene2(double deltaTime, GLFWwindow *window)
     );
     if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){//Color rojo
         // update the color
-        float timeValue = glfwGetTime();
         //Obtengo ubicasión del color
         int vertexColorLocation = glGetUniformLocation(programID, "ourColor");//Se pasa el valor que retorna y el nombre de la variable
         glUniform3f(vertexColorLocation, 1.0f, 0.0f, 0.0f);
     }if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){//Color verde
         // update the color
-        float timeValue = glfwGetTime();
         //Obtengo ubicasión del color
         int vertexColorLocation = glGetUniformLocation(programID, "ourColor");//Se pasa el valor que retorna y el nombre de la variable
         glUniform3f(vertexColorLocation, 0.0f, 1.1f, 0.0f);
     }if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){//color azul
         // update the color
-        float timeValue = glfwGetTime();
         //Obtengo ubicasión del color
         int vertexColorLocation = glGetUniformLocation(programID, "ourColor");//Se pasa el valor que retorna y el nombre de la variable
         glUniform3f(vertexColorLocation, 0.0f, 0.0f, 1.0f);
@@ -325,7 +324,7 @@ void Scene2(double deltaTime, GLFWwindow *window)
 
     triangle1.Rotate(vec3(deltaTime/2, deltaTime/2, deltaTime/2));
 
-    moveObject(deltaTime,window, "scene2");
+    rotateObject(deltaTime,window, "scene2");
     scaleObject(deltaTime,window, "scene2");
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 
@@ -364,7 +363,7 @@ void Scene3(double deltaTime, GLFWwindow *window){
         square1.timer -= deltaTime;
     }
     vec3 move = vec3(0,0,deltaTime * square1.direction);
-    square1.squareMove = move;
+    square1.squareMove += move;
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
@@ -378,7 +377,7 @@ void Scene3(double deltaTime, GLFWwindow *window){
         0,                                // stride
         (void*)0                          // array buffer offset
     );
-    moveObject(deltaTime,window, "scene3");
+    rotateObject(deltaTime,window, "scene3");
     scaleObject(deltaTime,window, "scene3");
     glDrawArrays(GL_TRIANGLES, 0, 12*3);
     glDisableVertexAttribArray(0);
@@ -388,6 +387,23 @@ void Scene3(double deltaTime, GLFWwindow *window){
 
 int main()
 {
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float) 768 / (float)768, 0.1f, 100.0f);
+    
+    // Or, for an ortho camera :
+    //glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
+    
+    // Camera matrix
+    glm::mat4 View = glm::lookAt(
+        glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+        glm::vec3(0,0,0), // and looks at the origin
+        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+        );
+    
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model = glm::mat4(1.0f);
+    // Our ModelViewProjection : multiplication of our 3 matrices
+    glm::mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
     float y = 0;
     // Initialise GLFW
@@ -453,6 +469,14 @@ int main()
 
     do
     {
+        // Get a handle for our "MVP" uniform
+        // Only during the initialisation
+        GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+        
+        // Send our transformation to the currently bound shader, in the "MVP" uniform
+        // This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
         //getsTime Dif
         t_start = t_end;
         t_end = std::chrono::high_resolution_clock::now();
