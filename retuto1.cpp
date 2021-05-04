@@ -104,12 +104,16 @@ class Square{
         vec3(-1.0f, 1.0f, 1.0f),
         vec3(1.0f,-1.0f, 1.0f)
     };
+    vec3 squareMove = vec3(0,0,0);
+    float timer = 3;
+    int direction = 1;
     quat squareRot = quat(vec3(0,0,0));
     vec3 squareScale = vec3(1,1,1);
     void PassToBuffer(GLfloat *vertexB){
 
         for(int i = 0; i < 36 ; i++){
             vec3 aux = vec3(vertexB[i*3],vertexB[i*3+1],vertexB[i*3+2]);
+            aux = aux + squareMove;
             aux = aux * squareRot;
             aux = aux * squareScale;
             vertexB[i*3] = aux.x;
@@ -319,6 +323,8 @@ void Scene2(double deltaTime, GLFWwindow *window)
         glUniform3f(vertexColorLocation, 0.0f, 0.0f, 1.0f);
     }
 
+    triangle1.Rotate(vec3(deltaTime/2, deltaTime/2, deltaTime/2));
+
     moveObject(deltaTime,window, "scene2");
     scaleObject(deltaTime,window, "scene2");
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
@@ -347,6 +353,19 @@ void Scene3(double deltaTime, GLFWwindow *window){
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+
+    if (square1.timer <= 0) //temporizador. Cada 3 segundos cambia la dirección del mobimiento.
+    {
+        square1.timer = 3;
+        square1.direction *= -1;
+    }
+    else
+    {
+        square1.timer -= deltaTime;
+    }
+    vec3 move = vec3(0,0,deltaTime * square1.direction);
+    square1.squareMove = move;
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
